@@ -9,3 +9,7 @@ book app labs 11-14 deltaV301d5
  <!-- PORT=5500  -->
 
 # added wireframe 
+<!-- public, styles, views, pages, ejs, css, files and directories, -->
+
+# added server.js
+
