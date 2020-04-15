@@ -14,3 +14,8 @@ book app labs 11-14 deltaV301d5
 # added server.js
 
 # added require and consts in server.js
+
+# added to server.js
+<!-- routes, middleware, comments -->
+
+# added books directory, details and show ejs files
