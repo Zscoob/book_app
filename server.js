@@ -27,7 +27,7 @@ app.set('view engine', 'ejs');
 //api routes
 //renders search form
 app.get('/', (req, res) => {
-  res.render('pages/index')
+  res.render('pages/index');
 });
 
 app.get('/', showHomepage);
@@ -41,15 +41,15 @@ app.post('/searches', createSearch);
 //a catch all
 app.get('*', send404);
 
-app.listen(PORT, ()=> console.log(`Listening on port: ${PORT}, Baby!`));)
+app.listen(PORT, ()=> console.log(`Listening on port: ${PORT}, Baby!`));
 
 //book function
 function Book(book){
-this.title = book.title ? book.title : 'no title available';
-this.author = book.authors ? book.authors : 'no authors available';
-this.description = book.description ? book.description : 'no description available';
-this.image = book.imageLinks ? book.imageLinks.thumbnail.replace(/^http/, 'https') : null;
-this.isbn = book.industryIdentifiers ? book.industryIdentifiers[0].identifier : 'We cant find the ISBN...';
+  this.title = book.title ? book.title : 'no title available';
+  this.author = book.authors ? book.authors : 'no authors available';
+  this.description = book.description ? book.description : 'no description available';
+  this.image = book.imageLinks ? book.imageLinks.thumbnail.replace(/^http/, 'https') : null;
+  this.isbn = book.industryIdentifiers ? book.industryIdentifiers[0].identifier : 'We cant find the ISBN...';
 }
 
 //error handling
@@ -63,7 +63,7 @@ function getErrorHandler(res,status = 500) {
 
 //show stuff
 function showSearch(req,res) {
-  res.render('pages/searches')
+  res.render('pages/searches');
 }
 
 function showHomepage(req,res) {
@@ -74,7 +74,7 @@ function showHomepage(req,res) {
 
 function showBook (req, res){
   req.body.id = req.params.id;
-  res.render('pages/bookview', {book:req.body});
+  res.render('pages/details', {book:req.body});
 }
 
 //submit dat shit
@@ -85,16 +85,16 @@ function submitBook(req,res){
     client.query(sql,values).then((sqlResponse)=>{
       const sql = 'SELECT * FROM books WHERE id=$1';
       client.query(sql, [sqlResponse.rows[0].id]).then((sqlResponse)=> {
-      console.log(sqlResponse);
-      res.render('pages/bookview', {book: sqlResponse.rows[0] });
+        console.log(sqlResponse);
+        res.render('pages/details', {book: sqlResponse.rows[0] });
       }).catch(getErrorHandler(res));
     }).catch(getErrorHandler(res));
   } catch (error) {
     handleError(res,error);
-   }
- }
+  }
+}
 
-//404 
+//404
 function send404(req,res) {
   res.status(404).send('sorry bud.. you dont even exist brah.');
 }
@@ -102,13 +102,18 @@ function send404(req,res) {
 //search the api
 function createSearch(req, res){
   let url = 'https://www.googleapis.com/books/v1/volumes?q=';
-console.log(req.body);
-console.log(req.body.search);
-if (req.body.search[1] === 'title') { url += `intitle: ${req.body.search[0]}`; }
-if (req.body.search[1] === 'author') { url += `inauthor: ${req.body.search[0]}`; }
+  console.log(req.body);
+  console.log(req.body.search);
+  if (req.body.search[1] === 'title') { url += `intitle: ${req.body.search[0]}`; }
+  if (req.body.search[1] === 'author') { url += `inauthor: ${req.body.search[0]}`; }
 
-superagent.get(url)
- .then(apiResponse => {
-
- })
+  superagent.get(url)
+    .then(apiResponse => {
+      console.log(apiResponse.body.items[0].volumeInfo.industryIdentifiers);
+      return apiResponse.body.items.map(bookResult => new Book(bookResult.volumeInfo));
+    })
+    .then(results => {
+      console.log(results);
+      res.render('pages/show',{books:results });
+    });
 }
